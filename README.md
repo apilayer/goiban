@@ -1,6 +1,12 @@
-/*
-The MIT License (MIT)
+goiban
+======
 
+Goiban implements functions for validating international bank account numbers using GO. You may freely use this code.
+
+
+
+The MIT License (MIT)
+------
 Copyright (c) 2013 Chris Grieger
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -20,21 +26,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
-*/
-
-package goiban
-
-/* 
-	Represents the result of an IBAN validation.
-*/
-type ValidationResult struct {
-	Valid bool `json:"valid"`
-	Message string `json:"message"`
-	Iban string `json:"iban"`
-
-}
-
-// Factory method
-func NewValidationResult(valid bool, message string, iban string) *ValidationResult {
-	return &ValidationResult{valid,message, iban}
-}

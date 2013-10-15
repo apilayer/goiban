@@ -1,3 +1,27 @@
+/*
+The MIT License (MIT)
+
+Copyright (c) 2013 Chris Grieger
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+*/
+
 package goiban
 
 import (
@@ -18,10 +42,8 @@ var (
 	successIndicator = big.NewInt(1)
 	ibanMod = big.NewInt(97)
 )
-/*
-	Returns a pointer to an Iban instance or nil on structural errors
-
-	Can return NIL on structural error
+/**
+	Returns a pointer to an Iban instance or nil on structural errors.
 */
 func ParseToIban(val string) *Iban {
 	// Init empty Iban object
@@ -38,7 +60,7 @@ func ParseToIban(val string) *Iban {
 }
 
 /*
-	Returns true for a valid IBAN
+	Returns a pointer to a goiban.ValidationResult.
 */
 func (iban *Iban) Validate() *ValidationResult {
 	var ok bool
@@ -61,7 +83,7 @@ func (iban *Iban) Validate() *ValidationResult {
 
 
 /*
-	Returns true if the string val can be parsed to an Iban Struct
+	Returns true if the string val can be parsed to an Iban Struct.
 */
 func IsParseable(val string) bool {
 	// Init empty Iban object
@@ -75,6 +97,11 @@ func IsParseable(val string) bool {
 	return true
 }
 
+/*
+	Returns a country code from a string value representing an IBAN.
+
+	Can return an empty string if value is invalid.
+*/
 func extractCountryCode(val string) string {
 	// has to be at least two digits long
 	if(len(val) < 2) {
@@ -91,6 +118,11 @@ func extractCountryCode(val string) string {
 	return possibleCountryCode
 }
 
+/*
+	Returns two check digits from a string value representing an IBAN.
+
+	Can return an empty string if the value is invalid.
+*/
 func extractCheckDigit(val string) string {
 	// starts at position 2 and is 2 digits long
 	if(len(val) < 4) {
@@ -107,6 +139,9 @@ func extractCheckDigit(val string) string {
 	return possibleCheckDigit
 }
 
+/*
+	Returns a BBAN from a string value representing an IBAN.
+*/
 func extractBBAN(val string) string {
 	// replace all spaces
 	val = strings.Replace(val," ","",-1);
@@ -139,7 +174,7 @@ func extractBBAN(val string) string {
 
 	e.g. DE -> 1314
 
-	The char value is by 55 and it's integer representation is concatenated to a string.
+	The char value is diminished by 55 and it's integer representation is concatenated onto a string.
 */
 func countryCodeToNumericString(countryCode string) string {
 	if(len(countryCode) > 2 || len(countryCode) < 2) {
