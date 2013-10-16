@@ -36,5 +36,18 @@ type ValidationResult struct {
 
 // Factory method
 func NewValidationResult(valid bool, message string, iban string) *ValidationResult {
-	return &ValidationResult{valid,message, iban}
+	return &ValidationResult{valid, message, iban}
+}
+/* 
+	Represents the result of a parsing attempt.
+*/
+type ParserResult struct {
+	Valid bool `json:"valid"`
+	Message string `json:"message"`
+	Data string `json:"data"`
+}
+
+// Factory method
+func NewParserResult(valid bool, message string, data string) *ParserResult {
+	return &ParserResult{valid, message, data}
 }

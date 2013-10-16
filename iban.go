@@ -28,6 +28,7 @@ import (
 	"strings"
 	//"fmt"
 	"math/big"
+	"strconv"
 )
 
 // describes the structure of an IBAN
@@ -49,13 +50,13 @@ func ParseToIban(val string) *Iban {
 	// Init empty Iban object
 	cc := extractCountryCode(val)
 	checkDigit := extractCheckDigit(val)
-	bban := extractBBAN(val)
+	bbanResult, bbanOk := extractBBAN(val)
 
-	if(len(cc)==0 || len(checkDigit) == 0 || len(bban) == 0) {
+	if(len(cc)==0 || len(checkDigit) == 0 || !bbanOk) {
 		return nil;
 	}
 
-	iban := &Iban{cc,checkDigit,bban,val}
+	iban := &Iban{cc,checkDigit,bbanResult.Data,val}
 	return iban
 }
 
@@ -85,16 +86,21 @@ func (iban *Iban) Validate() *ValidationResult {
 /*
 	Returns true if the string val can be parsed to an Iban Struct.
 */
-func IsParseable(val string) bool {
+func IsParseable(val string) *ParserResult {
 	// Init empty Iban object
 	cc := extractCountryCode(val)
-	checkDigit := extractCheckDigit(val)
-	bban := extractBBAN(val)
+	if(cc == "") {
+		return NewParserResult(false, "Invalid country code.", "")
+	}
 
-	if(len(cc)==0 || len(checkDigit) == 0 || len(bban) == 0) {
-		return false;
-	} 
-	return true
+	checkDigit := extractCheckDigit(val)
+	if(checkDigit == "") {
+		return NewParserResult(false, "Invalid / no check digits found.", "")
+	}
+
+	bbanResult, _ := extractBBAN(val)
+	
+	return bbanResult
 }
 
 /*
@@ -142,19 +148,20 @@ func extractCheckDigit(val string) string {
 /*
 	Returns a BBAN from a string value representing an IBAN.
 */
-func extractBBAN(val string) string {
+func extractBBAN(val string) (*ParserResult, bool) {
 	// replace all spaces
 	val = strings.Replace(val," ","",-1);
 	// starts at position 4 in the string	
-	if(len(val) < 4 || len(val) > 34) {	
-		return "";
+	if(len(val) < 5 || len(val) > 34) {	
+		return NewParserResult(false, "Invalid BBAN length.", ""), false
 	}
 
 	// we can do a more accurate check for some countries
 	// see static_data.go
-	allowedLength := getAllowedLength(extractCountryCode(val))
+	countryCode := extractCountryCode(val)
+	allowedLength := getAllowedLength(countryCode)
 	if(allowedLength > 0 && (len(val) > allowedLength)) {
-		return "";
+		return NewParserResult(false, "BBAN length invalid. Maximum for " + countryCode + " is " + strconv.Itoa(allowedLength) + ".", ""), false
 	}
 
 	bban := strings.ToUpper(val[4:len(val)])
@@ -162,11 +169,11 @@ func extractBBAN(val string) string {
 	// only alphanumeric chars may be used
 	for _,ch := range bban {
 		if(!isValidNum(uint8(ch)) && !isValidChar(uint8(ch))) {
-			return ""
+			return NewParserResult(false, "Invalid characters in BBAN: " + string(ch), ""), false
 		}
 	}
 
-	return bban
+	return NewParserResult(true, "", bban), true
 }
 
 /*

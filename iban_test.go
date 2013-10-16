@@ -50,19 +50,19 @@ func TestCanCheckIbanValidity(t *testing.T) {
 func TestCanCheckIbanParseable(t *testing.T) {
 	input:="GB29 NWBK 6016 1331 9268 19"
 	result:=IsParseable(input)	
-	if(result != true) {
+	if(result.Valid != true) {
 		t.Errorf("Failed to validate BBAN.")
 	}
 
 	input="GB29"
 	result=IsParseable(input)	
-	if(result == true) {
+	if(result.Valid) {
 		t.Errorf("Failed to validate BBAN.")
 	}
 
 	input=""
 	result=IsParseable(input)	
-	if(result == true) {
+	if(result.Valid) {
 		t.Errorf("Failed to validate BBAN.")
 	}
 }
@@ -97,26 +97,30 @@ func TestShouldNotInstantiateIbanFromInvalidString(t *testing.T) {
 
 func TestExtractValidBBAN(t *testing.T) {
 	input:="GB29 NWBK 6016 1331 9268 19"
-	result:=extractBBAN(input)
-	if(result != "NWBK60161331926819") {
+	result,_:=extractBBAN(input)
+	if(result.Data != "NWBK60161331926819") {
 		t.Errorf("Failed to extract BBAN.")
 	}
 }
 
 func TestExtractInvalidBBAN(t *testing.T) {
 	input:="GB29"
-	if(extractBBAN(input) != "") {
+	var ok bool
+	_, ok = extractBBAN(input)
+
+	if(ok) {
 		t.Errorf("Extracted invalid BBAN.")
 	}
 
 	input="GB29 NWBK 6016 1331 9268 19GB29 NWBK 6016 1331 9268 19GB29 NWBK 6016 1331 9268 19"
-	if(extractBBAN(input) != "") {
+	_, ok = extractBBAN(input)
+	if(ok) {
 		t.Errorf("Extracted invalid BBAN.")
 	}
 
 	input="GB29 NWBK 6016 1331 9268 19 DURR"
-	result:=extractBBAN(input)
-	if(result != "") {
+	_, ok = extractBBAN(input)
+	if(ok) {
 		t.Errorf("Extracted invalid BBAN. (length restriction by map)")
 	}
 }
