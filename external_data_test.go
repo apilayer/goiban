@@ -25,55 +25,25 @@ THE SOFTWARE.
 package goiban
 
 import (
-	"strconv"
-	"os"
-	"bufio"
+	"testing"
 )
 
+func TestCanReadFromBundesbankFile(t *testing.T) {
+	ch:=make(chan interface{})
+	go ReadFileToEntries("test/bundesbank.txt", &BundesbankFileEntry{}, ch)
 
-func isValidChar(ch uint8) bool {
-	return (ch > 64 && ch < 91)
+	peek := (<- ch).(*BundesbankFileEntry)
+	if peek.Name == "" {
+		t.Errorf("Failed to read file.")
+	}
 }
 
-func isValidNum(ch uint8) bool {
-	return (ch > 47 && ch < 58)
-}
 
-
-func toNumericString(val string) string {
-	numericVal := ""
-	for _,ch := range val {		
-		// if it's neither a number nor a char
-		// fail
-		intCh := uint8(ch)
-		if(!isValidNum(intCh) &&
-		   !isValidChar(intCh)) {
-			return "";
-		}
-		if(isValidChar(intCh)) {
-			numericVal += strconv.Itoa(int(ch)-55)
-		} else {
-			numericVal += string(ch)
-		}
-	}	
-
-	return numericVal
-}
-
-// code taken from 
-// http://stackoverflow.com/a/18479916/1408463
-// changed to take a channel instead of writing an array
-func readLines(path string, out chan string) {
-  file, err := os.Open(path)
-  if err != nil {
-  	out <- ""
-  	return
-  }
-  defer file.Close()
-
-  scanner := bufio.NewScanner(file)
-  for scanner.Scan() {
-    out <- scanner.Text()
-  }
-  close(out)
+func TestCannotReadFromNonExistingBundesbankFile(t *testing.T) {
+	ch:=make(chan interface{})
+	go ReadFileToEntries("test/bundesbank_doesntexist.txt", &BundesbankFileEntry{}, ch)
+	result := <- ch
+	if result != nil {
+		t.Errorf("Failed to read file.")
+	}
 }
