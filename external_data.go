@@ -25,35 +25,84 @@ THE SOFTWARE.
 package goiban
 
 import (
-	"strconv"
 	"fmt"
+	"database/sql"
+	co "github.com/fourcube/goiban/countries"
 )
 
-/* 
-	Describes the field width of the fixed width text file
-	which can be found at
-	http://www.bundesbank.de/Redaktion/DE/Standardartikel/Kerngeschaeftsfelder/Unbarer_Zahlungsverkehr/bankleitzahlen_download.html?searchArchive=0&submit=Suchen&searchIssued=0&templateQueryString=Bankleitzahlen
-	
-	Example:
-	bankcodemname######                                                zip##city                               short#####                 pan##bic#########z#id###cdnext####
-	100000001Bundesbank                                                10591Berlin                             BBk Berlin                 20100MARKDEF110009011380U000000000
-*/
+var (
+	SELECT_BIC = "SELECT bic FROM BANK_DATA WHERE bankcode = ? AND country = ?;"
+	SELECT_BIC_STMT *sql.Stmt
+	SELECT_BANK_INFORMATION = "SELECT bankcode, name, zip, city, bic FROM BANK_DATA WHERE bankcode = ? AND country = ?;"
+	SELECT_BANK_INFORMATION_STMT *sql.Stmt
+)
 
-type BundesbankFileEntry struct{
-	Bankcode string		// 8
-	M int				// 1
-	Name string			// 58
-	Zip string			// 5
-	City string			// 35
-	ShortName string	// 27
-	Pan int 			// 5
-	Bic string			// 12
-	CheckAlgo string	// 2 	enumerates some checksum algorithms
-						// 		described in http://www.bundesbank.de/Redaktion/DE/Downloads/Kerngeschaeftsfelder/Unbarer_Zahlungsverkehr/pruefzifferberechnungsmethoden.pdf?__blob=publicationFile
-	Id int 				// 5	internal id
-	Change string		// 1
-	ToBeDeleted int 	// 1
-	NewBankCode	string	// 8							
+type BankInfo struct {
+	Bankcode string `json:"bankCode"`
+	Name string `json:"name"`
+	Zip string `json:"zip"`
+	City string `json:"city"`
+	Bic	string `json:"bic"`
+}
+
+func GetBic(iban *Iban, intermediateResult *ValidationResult, db *sql.DB) *ValidationResult {
+	length, ok := COUNTRY_CODE_TO_BANK_CODE_LENGTH[(iban.countryCode)]
+
+	if !ok {		
+		intermediateResult.Messages = append(intermediateResult.Messages, "Cannot get BIC. No information available.")
+		return intermediateResult
+	}
+
+	bankCode := iban.bban[0:length]
+	bankData := getBankInformationByCountryAndBankCodeFromDb(iban.countryCode, bankCode, db)
+
+	if bankData == nil {
+		intermediateResult.Messages = append(intermediateResult.Messages, "No BIC found for bank code: " + bankCode)
+		return intermediateResult
+	}	
+
+	intermediateResult.BankData = *bankData
+
+	return intermediateResult
+}
+
+func prepareSelectBankInformationStatement(db *sql.DB) {
+	var err error
+
+	SELECT_BANK_INFORMATION_STMT, err = db.Prepare(SELECT_BANK_INFORMATION)	
+	if err != nil {
+		panic("Couldn't prepare statement: " +  SELECT_BANK_INFORMATION)
+	}
+
+
+}
+
+func getBankInformationByCountryAndBankCodeFromDb(countryCode string, bankCode string, db *sql.DB) *BankInfo {
+
+	if SELECT_BANK_INFORMATION_STMT == nil {
+		prepareSelectBankInformationStatement(db)
+	}
+	
+	var dbBankcode, dbName, dbZip, dbCity, dbBic string
+
+	err := SELECT_BANK_INFORMATION_STMT.QueryRow(bankCode, countryCode).Scan(&dbBankcode, &dbName, &dbZip, &dbCity, &dbBic)
+
+	switch {
+		case err == sql.ErrNoRows:
+			return nil
+		case err != nil:
+			panic("Failed to load bank info from db.")
+	}	
+
+	return &BankInfo{dbBankcode, dbName, dbZip, dbCity, dbBic}
+}
+
+func prepareSelectBicStatement(db *sql.DB) {
+	var err error
+	SELECT_BIC_STMT, err = db.Prepare(SELECT_BIC)
+	if err != nil {
+		panic("Couldn't prepare statement: " +  SELECT_BIC)
+	}
 }
 
 func ReadFileToEntries(path string, t interface{}, out chan interface{}) {
@@ -61,39 +110,17 @@ func ReadFileToEntries(path string, t interface{}, out chan interface{}) {
 	switch t:= t.(type) {
 	default:
 		fmt.Println("default:",t)
-	case *BundesbankFileEntry:
+	case *co.BundesbankFileEntry:
 		go readLines(path, cLines)		
 		for l := range cLines {
 			if len(l) == 0 {
 				out <- nil
 				return
 			} 
-			out <- bundesbankStringToEntry(l)
+			out <- co.BundesbankStringToEntry(l)
 		}
 
 	}
 	close(out)
 }
 
-func bundesbankStringToEntry(val string) *BundesbankFileEntry {
-	m,_:=strconv.Atoi(val[8:9])
-	pan,_:=strconv.Atoi(val[134:139])
-	id,_:=strconv.Atoi(val[153:158])
-	toBeDeleted,_:=strconv.Atoi(val[159:160])
-
-	return &BundesbankFileEntry{
-		val[0:8],
-		m,
-		val[9:67],
-		val[67:72],
-		val[72:107],
-		val[107:134],
-		pan,
-		val[139:151],
-		val[151:153],
-		id,
-		val[158:159],
-		toBeDeleted,
-		val[160:168],
-	}
-}

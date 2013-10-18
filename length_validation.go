@@ -25,6 +25,10 @@ THE SOFTWARE.
 package goiban
 
 var (
+	COUNTRY_CODE_TO_BANK_CODE_LENGTH = map[string]int {
+		"DE": 8,
+	}
+
 	COUNTRY_CODE_TO_LENGTH_MAP = map[string]int {
 		"LV": 21,
 		"LU": 20,

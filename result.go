@@ -29,14 +29,19 @@ package goiban
 */
 type ValidationResult struct {
 	Valid bool `json:"valid"`
-	Message string `json:"message"`
+	Messages []string `json:"messages"`
 	Iban string `json:"iban"`
-
+	BankData BankInfo `json:"bankData"`
+	CheckResults map[string]bool `json:"checkResults"`
 }
 
 // Factory method
 func NewValidationResult(valid bool, message string, iban string) *ValidationResult {
-	return &ValidationResult{valid, message, iban}
+	messages := []string{}
+	if len(message) > 0 {
+		messages = append(messages, message)
+	}
+	return &ValidationResult{valid, messages, iban, *&BankInfo{}, map[string]bool{}}
 }
 /* 
 	Represents the result of a parsing attempt.

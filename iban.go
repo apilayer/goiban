@@ -37,6 +37,7 @@ type Iban struct {
 	checkDigit string
 	bban string
 	original string
+	bic string
 }
 
 var (
@@ -56,7 +57,7 @@ func ParseToIban(val string) *Iban {
 		return nil;
 	}
 
-	iban := &Iban{cc,checkDigit,bbanResult.Data,val}
+	iban := &Iban{cc,checkDigit,bbanResult.Data,val,""}
 	return iban
 }
 

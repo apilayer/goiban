@@ -28,6 +28,7 @@ import (
 	"strconv"
 	"os"
 	"bufio"
+	//iconv "github.com/djimenez/iconv-go"
 )
 
 
@@ -69,11 +70,15 @@ func readLines(path string, out chan string) {
   	out <- ""
   	return
   }
+
+  //converter,_ := iconv.NewConverter("utf-8", "windows-1252")
   defer file.Close()
+  //defer converter.Close()
 
   scanner := bufio.NewScanner(file)
   for scanner.Scan() {
-    out <- scanner.Text()
+  	res := scanner.Text()
+    out <- res
   }
   close(out)
 }
