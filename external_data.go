@@ -25,30 +25,30 @@ THE SOFTWARE.
 package goiban
 
 import (
-	"fmt"
 	"database/sql"
+	"fmt"
 	co "github.com/fourcube/goiban/countries"
 )
 
 var (
-	SELECT_BIC = "SELECT bic FROM BANK_DATA WHERE bankcode = ? AND country = ?;"
-	SELECT_BIC_STMT *sql.Stmt
-	SELECT_BANK_INFORMATION = "SELECT bankcode, name, zip, city, bic FROM BANK_DATA WHERE bankcode = ? AND country = ?;"
+	SELECT_BIC                   = "SELECT bic FROM BANK_DATA WHERE bankcode = ? AND country = ?;"
+	SELECT_BIC_STMT              *sql.Stmt
+	SELECT_BANK_INFORMATION      = "SELECT bankcode, name, zip, city, bic FROM BANK_DATA WHERE bankcode = ? AND country = ?;"
 	SELECT_BANK_INFORMATION_STMT *sql.Stmt
 )
 
 type BankInfo struct {
 	Bankcode string `json:"bankCode"`
-	Name string `json:"name"`
-	Zip string `json:"zip"`
-	City string `json:"city"`
-	Bic	string `json:"bic"`
+	Name     string `json:"name"`
+	Zip      string `json:"zip"`
+	City     string `json:"city"`
+	Bic      string `json:"bic"`
 }
 
 func GetBic(iban *Iban, intermediateResult *ValidationResult, db *sql.DB) *ValidationResult {
 	length, ok := COUNTRY_CODE_TO_BANK_CODE_LENGTH[(iban.countryCode)]
 
-	if !ok {		
+	if !ok {
 		intermediateResult.Messages = append(intermediateResult.Messages, "Cannot get BIC. No information available.")
 		return intermediateResult
 	}
@@ -57,9 +57,9 @@ func GetBic(iban *Iban, intermediateResult *ValidationResult, db *sql.DB) *Valid
 	bankData := getBankInformationByCountryAndBankCodeFromDb(iban.countryCode, bankCode, db)
 
 	if bankData == nil {
-		intermediateResult.Messages = append(intermediateResult.Messages, "No BIC found for bank code: " + bankCode)
+		intermediateResult.Messages = append(intermediateResult.Messages, "No BIC found for bank code: "+bankCode)
 		return intermediateResult
-	}	
+	}
 
 	intermediateResult.BankData = *bankData
 
@@ -69,11 +69,10 @@ func GetBic(iban *Iban, intermediateResult *ValidationResult, db *sql.DB) *Valid
 func prepareSelectBankInformationStatement(db *sql.DB) {
 	var err error
 
-	SELECT_BANK_INFORMATION_STMT, err = db.Prepare(SELECT_BANK_INFORMATION)	
+	SELECT_BANK_INFORMATION_STMT, err = db.Prepare(SELECT_BANK_INFORMATION)
 	if err != nil {
-		panic("Couldn't prepare statement: " +  SELECT_BANK_INFORMATION)
+		panic("Couldn't prepare statement: " + SELECT_BANK_INFORMATION)
 	}
-
 
 }
 
@@ -82,17 +81,17 @@ func getBankInformationByCountryAndBankCodeFromDb(countryCode string, bankCode s
 	if SELECT_BANK_INFORMATION_STMT == nil {
 		prepareSelectBankInformationStatement(db)
 	}
-	
+
 	var dbBankcode, dbName, dbZip, dbCity, dbBic string
 
 	err := SELECT_BANK_INFORMATION_STMT.QueryRow(bankCode, countryCode).Scan(&dbBankcode, &dbName, &dbZip, &dbCity, &dbBic)
 
 	switch {
-		case err == sql.ErrNoRows:
-			return nil
-		case err != nil:
-			panic("Failed to load bank info from db.")
-	}	
+	case err == sql.ErrNoRows:
+		return nil
+	case err != nil:
+		panic("Failed to load bank info from db.")
+	}
 
 	return &BankInfo{dbBankcode, dbName, dbZip, dbCity, dbBic}
 }
@@ -101,26 +100,25 @@ func prepareSelectBicStatement(db *sql.DB) {
 	var err error
 	SELECT_BIC_STMT, err = db.Prepare(SELECT_BIC)
 	if err != nil {
-		panic("Couldn't prepare statement: " +  SELECT_BIC)
+		panic("Couldn't prepare statement: " + SELECT_BIC)
 	}
 }
 
 func ReadFileToEntries(path string, t interface{}, out chan interface{}) {
 	cLines := make(chan string)
-	switch t:= t.(type) {
+	switch t := t.(type) {
 	default:
-		fmt.Println("default:",t)
+		fmt.Println("default:", t)
 	case *co.BundesbankFileEntry:
-		go readLines(path, cLines)		
+		go readLines(path, cLines)
 		for l := range cLines {
 			if len(l) == 0 {
 				out <- nil
 				return
-			} 
+			}
 			out <- co.BundesbankStringToEntry(l)
 		}
 
 	}
 	close(out)
 }
-
