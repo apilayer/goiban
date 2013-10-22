@@ -35,7 +35,7 @@ import (
 	http://www.bundesbank.de/Redaktion/DE/Standardartikel/Kerngeschaeftsfelder/Unbarer_Zahlungsverkehr/bankleitzahlen_download.html?searchArchive=0&submit=Suchen&searchIssued=0&templateQueryString=Bankleitzahlen
 
 	Example:
-	bankcodemname######                                                zip##city                               short#####                 pan##bic#########z#id###cdnext####
+	bankcodemname######                                                zip##city                               short#####                 pan##bic########z##id###cdnext####
 	100000001Bundesbank                                                10591Berlin                             BBk Berlin                 20100MARKDEF110009011380U000000000
 */
 
@@ -47,10 +47,10 @@ type BundesbankFileEntry struct {
 	City      string // 35
 	ShortName string // 27
 	Pan       int    // 5
-	Bic       string // 12
+	Bic       string // 11
 	CheckAlgo string // 2 	enumerates some checksum algorithms
 	// 		described in http://www.bundesbank.de/Redaktion/DE/Downloads/Kerngeschaeftsfelder/Unbarer_Zahlungsverkehr/pruefzifferberechnungsmethoden.pdf?__blob=publicationFile
-	Id          int    // 5	internal id
+	Id          string // 5	internal id
 	Change      string // 1
 	ToBeDeleted int    // 1
 	NewBankCode string // 8
@@ -60,7 +60,7 @@ func BundesbankStringToEntry(val string) *BundesbankFileEntry {
 	runeVal := []rune(val)
 	m, _ := strconv.Atoi(string(runeVal[8:9]))
 	pan, _ := strconv.Atoi(string(runeVal[134:139]))
-	id, _ := strconv.Atoi(string(runeVal[153:158]))
+	id := string(runeVal[152:157])
 	toBeDeleted, _ := strconv.Atoi(string(runeVal[159:160]))
 
 	return &BundesbankFileEntry{
@@ -71,8 +71,8 @@ func BundesbankStringToEntry(val string) *BundesbankFileEntry {
 		toTrimmedString(runeVal[72:107]),
 		toTrimmedString(runeVal[107:134]),
 		pan,
-		toTrimmedString(runeVal[139:151]),
-		toTrimmedString(runeVal[151:153]),
+		toTrimmedString(runeVal[139:150]),
+		toTrimmedString(runeVal[150:152]),
 		id,
 		toTrimmedString(runeVal[158:159]),
 		toBeDeleted,

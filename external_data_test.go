@@ -25,32 +25,31 @@ THE SOFTWARE.
 package goiban
 
 import (
-	"testing"
-	"fmt"
 	"database/sql"
-	_ "github.com/go-sql-driver/mysql"
+	"fmt"
 	co "github.com/fourcube/goiban/countries"
+	_ "github.com/go-sql-driver/mysql"
+	"testing"
 )
 
 var (
-	db, err = sql.Open("mysql", "root:root@/goiban")
+	db, err = sql.Open("mysql", "root:root@/goiban?charset=utf8")
 )
 
 func TestCanReadFromBundesbankFile(t *testing.T) {
-	ch:=make(chan interface{})
+	ch := make(chan interface{})
 	go ReadFileToEntries("test/bundesbank.txt", &co.BundesbankFileEntry{}, ch)
 
-	peek := (<- ch).(*co.BundesbankFileEntry)
+	peek := (<-ch).(*co.BundesbankFileEntry)
 	if peek.Name == "" {
 		t.Errorf("Failed to read file.")
 	}
 }
 
-
 func TestCannotReadFromNonExistingBundesbankFile(t *testing.T) {
-	ch:=make(chan interface{})
+	ch := make(chan interface{})
 	go ReadFileToEntries("test/bundesbank_doesntexist.txt", &co.BundesbankFileEntry{}, ch)
-	result := <- ch
+	result := <-ch
 	if result != nil {
 		t.Errorf("Failed to read file.")
 	}
