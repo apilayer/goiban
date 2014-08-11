@@ -44,12 +44,17 @@ var (
 	successIndicator = big.NewInt(1)
 	ibanMod = big.NewInt(97)
 )
+
+func (i *Iban) GetCountryCode() string {
+	return i.countryCode
+}
+
 /**
 	Returns a pointer to an Iban instance or nil on structural errors.
 */
 func ParseToIban(val string) *Iban {
 	// Init empty Iban object
-	cc := extractCountryCode(val)
+	cc := ExtractCountryCode(val)
 	checkDigit := extractCheckDigit(val)
 	bbanResult, bbanOk := extractBBAN(val)
 
@@ -89,7 +94,7 @@ func (iban *Iban) Validate() *ValidationResult {
 */
 func IsParseable(val string) *ParserResult {
 	// Init empty Iban object
-	cc := extractCountryCode(val)
+	cc := ExtractCountryCode(val)
 	if(cc == "") {
 		return NewParserResult(false, "Invalid country code.", "")
 	}
@@ -109,7 +114,7 @@ func IsParseable(val string) *ParserResult {
 
 	Can return an empty string if value is invalid.
 */
-func extractCountryCode(val string) string {
+func ExtractCountryCode(val string) string {
 	// has to be at least two digits long
 	if(len(val) < 2) {
 		return "";
@@ -159,7 +164,7 @@ func extractBBAN(val string) (*ParserResult, bool) {
 
 	// we can do a more accurate check for some countries
 	// see static_data.go
-	countryCode := extractCountryCode(val)
+	countryCode := ExtractCountryCode(val)
 	allowedLength := getAllowedLength(countryCode)
 	if(allowedLength > 0 && (len(val) > allowedLength)) {
 		return NewParserResult(false, "BBAN length invalid. Maximum for " + countryCode + " is " + strconv.Itoa(allowedLength) + ".", ""), false
