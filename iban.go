@@ -25,24 +25,23 @@ THE SOFTWARE.
 package goiban
 
 import (
-	"strings"
-	//"fmt"
 	"math/big"
 	"strconv"
+	"strings"
 )
 
 // describes the structure of an IBAN
 type Iban struct {
 	countryCode string
-	checkDigit string
-	bban string
-	original string
-	bic string
+	checkDigit  string
+	bban        string
+	original    string
+	bic         string
 }
 
 var (
 	successIndicator = big.NewInt(1)
-	ibanMod = big.NewInt(97)
+	ibanMod          = big.NewInt(97)
 )
 
 func (i *Iban) GetCountryCode() string {
@@ -50,7 +49,7 @@ func (i *Iban) GetCountryCode() string {
 }
 
 /**
-	Returns a pointer to an Iban instance or nil on structural errors.
+Returns a pointer to an Iban instance or nil on structural errors.
 */
 func ParseToIban(val string) *Iban {
 	// Init empty Iban object
@@ -58,11 +57,11 @@ func ParseToIban(val string) *Iban {
 	checkDigit := extractCheckDigit(val)
 	bbanResult, bbanOk := extractBBAN(val)
 
-	if(len(cc)==0 || len(checkDigit) == 0 || !bbanOk) {
-		return nil;
+	if len(cc) == 0 || len(checkDigit) == 0 || !bbanOk {
+		return nil
 	}
 
-	iban := &Iban{cc,checkDigit,bbanResult.Data,val,""}
+	iban := &Iban{cc, checkDigit, bbanResult.Data, val, ""}
 	return iban
 }
 
@@ -71,23 +70,22 @@ func ParseToIban(val string) *Iban {
 */
 func (iban *Iban) Validate() *ValidationResult {
 	var ok bool
-	validateableString:= toNumericString(iban.bban) + countryCodeToNumericString(iban.countryCode) + iban.checkDigit
+	validateableString := toNumericString(iban.bban) + countryCodeToNumericString(iban.countryCode) + iban.checkDigit
 
-	intBuf:=big.NewInt(0)
-	
-	intBuf, ok = intBuf.SetString(validateableString,10, )
+	intBuf := big.NewInt(0)
+
+	intBuf, ok = intBuf.SetString(validateableString, 10)
 	if !ok {
-		return NewValidationResult(false,"Could not parse IBAN number.",iban.original);
+		return NewValidationResult(false, "Could not parse IBAN number.", iban.original)
 	}
-	result := intBuf.Mod(intBuf,ibanMod) 
-	
+	result := intBuf.Mod(intBuf, ibanMod)
+
 	if result.Cmp(successIndicator) == 0 {
-		return NewValidationResult(true,"",iban.original);
+		return NewValidationResult(true, "", iban.original)
 	}
 
-	return NewValidationResult(false,"Validation failed.",iban.original);
+	return NewValidationResult(false, "Validation failed.", iban.original)
 }
-
 
 /*
 	Returns true if the string val can be parsed to an Iban Struct.
@@ -95,17 +93,17 @@ func (iban *Iban) Validate() *ValidationResult {
 func IsParseable(val string) *ParserResult {
 	// Init empty Iban object
 	cc := ExtractCountryCode(val)
-	if(cc == "") {
+	if cc == "" {
 		return NewParserResult(false, "Invalid country code.", "")
 	}
 
 	checkDigit := extractCheckDigit(val)
-	if(checkDigit == "") {
+	if checkDigit == "" {
 		return NewParserResult(false, "Invalid / no check digits found.", "")
 	}
 
 	bbanResult, _ := extractBBAN(val)
-	
+
 	return bbanResult
 }
 
@@ -116,15 +114,15 @@ func IsParseable(val string) *ParserResult {
 */
 func ExtractCountryCode(val string) string {
 	// has to be at least two digits long
-	if(len(val) < 2) {
-		return "";
+	if len(val) < 2 {
+		return ""
 	}
 
 	possibleCountryCode := strings.ToUpper(val[0:2])
 
-	if(!isValidChar(possibleCountryCode[0]) || 
-	   !isValidChar(possibleCountryCode[1])) {
-		return "";
+	if !isValidChar(possibleCountryCode[0]) ||
+		!isValidChar(possibleCountryCode[1]) {
+		return ""
 	}
 
 	return possibleCountryCode
@@ -137,15 +135,15 @@ func ExtractCountryCode(val string) string {
 */
 func extractCheckDigit(val string) string {
 	// starts at position 2 and is 2 digits long
-	if(len(val) < 4) {
-		return "";
+	if len(val) < 4 {
+		return ""
 	}
 
 	possibleCheckDigit := strings.ToUpper(val[2:4])
 
-	if(!isValidNum(possibleCheckDigit[0]) || 
-	   !isValidNum(possibleCheckDigit[1])) {
-		return "";
+	if !isValidNum(possibleCheckDigit[0]) ||
+		!isValidNum(possibleCheckDigit[1]) {
+		return ""
 	}
 
 	return possibleCheckDigit
@@ -156,9 +154,9 @@ func extractCheckDigit(val string) string {
 */
 func extractBBAN(val string) (*ParserResult, bool) {
 	// replace all spaces
-	val = strings.Replace(val," ","",-1);
-	// starts at position 4 in the string	
-	if(len(val) < 5 || len(val) > 34) {	
+	val = strings.Replace(val, " ", "", -1)
+	// starts at position 4 in the string
+	if len(val) < 5 || len(val) > 34 {
 		return NewParserResult(false, "Invalid BBAN length.", ""), false
 	}
 
@@ -166,16 +164,16 @@ func extractBBAN(val string) (*ParserResult, bool) {
 	// see static_data.go
 	countryCode := ExtractCountryCode(val)
 	allowedLength := getAllowedLength(countryCode)
-	if(allowedLength > 0 && (len(val) > allowedLength)) {
-		return NewParserResult(false, "BBAN length invalid. Maximum for " + countryCode + " is " + strconv.Itoa(allowedLength) + ".", ""), false
+	if allowedLength > 0 && (len(val) > allowedLength) {
+		return NewParserResult(false, "BBAN length invalid. Maximum for "+countryCode+" is "+strconv.Itoa(allowedLength)+".", ""), false
 	}
 
 	bban := strings.ToUpper(val[4:len(val)])
 
 	// only alphanumeric chars may be used
-	for _,ch := range bban {
-		if(!isValidNum(uint8(ch)) && !isValidChar(uint8(ch))) {
-			return NewParserResult(false, "Invalid characters in BBAN: " + string(ch), ""), false
+	for _, ch := range bban {
+		if !isValidNum(uint8(ch)) && !isValidChar(uint8(ch)) {
+			return NewParserResult(false, "Invalid characters in BBAN: "+string(ch), ""), false
 		}
 	}
 
@@ -190,8 +188,8 @@ func extractBBAN(val string) (*ParserResult, bool) {
 	The char value is diminished by 55 and it's integer representation is concatenated onto a string.
 */
 func countryCodeToNumericString(countryCode string) string {
-	if(len(countryCode) > 2 || len(countryCode) < 2) {
-		return ""		
-	}	
+	if len(countryCode) > 2 || len(countryCode) < 2 {
+		return ""
+	}
 	return toNumericString(countryCode)
 }

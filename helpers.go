@@ -25,12 +25,10 @@ THE SOFTWARE.
 package goiban
 
 import (
-	"strconv"
-	"os"
 	"bufio"
-	//iconv "github.com/djimenez/iconv-go"
+	"os"
+	"strconv"
 )
-
 
 func isValidChar(ch uint8) bool {
 	return (ch > 64 && ch < 91)
@@ -40,45 +38,44 @@ func isValidNum(ch uint8) bool {
 	return (ch > 47 && ch < 58)
 }
 
-
 func toNumericString(val string) string {
 	numericVal := ""
-	for _,ch := range val {		
+	for _, ch := range val {
 		// if it's neither a number nor a char
 		// fail
 		intCh := uint8(ch)
-		if(!isValidNum(intCh) &&
-		   !isValidChar(intCh)) {
-			return "";
+		if !isValidNum(intCh) &&
+			!isValidChar(intCh) {
+			return ""
 		}
-		if(isValidChar(intCh)) {
-			numericVal += strconv.Itoa(int(ch)-55)
+		if isValidChar(intCh) {
+			numericVal += strconv.Itoa(int(ch) - 55)
 		} else {
 			numericVal += string(ch)
 		}
-	}	
+	}
 
 	return numericVal
 }
 
-// code taken from 
+// code taken from
 // http://stackoverflow.com/a/18479916/1408463
 // changed to take a channel instead of writing an array
 func readLines(path string, out chan string) {
-  file, err := os.Open(path)
-  if err != nil {
-  	out <- ""
-  	return
-  }
+	file, err := os.Open(path)
+	if err != nil {
+		out <- ""
+		return
+	}
 
-  //converter,_ := iconv.NewConverter("utf-8", "windows-1252")
-  defer file.Close()
-  //defer converter.Close()
+	//converter,_ := iconv.NewConverter("utf-8", "windows-1252")
+	defer file.Close()
+	//defer converter.Close()
 
-  scanner := bufio.NewScanner(file)
-  for scanner.Scan() {
-  	res := scanner.Text()
-    out <- res
-  }
-  close(out)
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		res := scanner.Text()
+		out <- res
+	}
+	close(out)
 }

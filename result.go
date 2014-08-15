@@ -24,14 +24,14 @@ THE SOFTWARE.
 
 package goiban
 
-/* 
+/*
 	Represents the result of an IBAN validation.
 */
 type ValidationResult struct {
-	Valid bool `json:"valid"`
-	Messages []string `json:"messages"`
-	Iban string `json:"iban"`
-	BankData BankInfo `json:"bankData"`
+	Valid        bool            `json:"valid"`
+	Messages     []string        `json:"messages"`
+	Iban         string          `json:"iban"`
+	BankData     BankInfo        `json:"bankData"`
 	CheckResults map[string]bool `json:"checkResults"`
 }
 
@@ -43,13 +43,14 @@ func NewValidationResult(valid bool, message string, iban string) *ValidationRes
 	}
 	return &ValidationResult{valid, messages, iban, *&BankInfo{}, map[string]bool{}}
 }
-/* 
+
+/*
 	Represents the result of a parsing attempt.
 */
 type ParserResult struct {
-	Valid bool `json:"valid"`
+	Valid   bool   `json:"valid"`
 	Message string `json:"message"`
-	Data string `json:"data"`
+	Data    string `json:"data"`
 }
 
 // Factory method

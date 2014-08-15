@@ -31,7 +31,7 @@ import (
 var (
 	SELECT_BY_BANK_CODE = "SELECT 1 FROM BANK_DATA WHERE bankcode = ? and country = ?;"
 	SELECT_BY_BANK_CODE_STMT *sql.Stmt
-	
+
 
 )
 
@@ -52,14 +52,14 @@ func ValidateBankCode(iban *Iban, intermediateResult *ValidationResult, db *sql.
 
 	var res int
 	err := SELECT_BY_BANK_CODE_STMT.QueryRow(bankCode, iban.countryCode).Scan(&res)
-	
+
 	switch {
 		case err == sql.ErrNoRows:
 			intermediateResult.Valid = false
 			intermediateResult.Messages = append(intermediateResult.Messages, "Invalid bank code: " + bankCode)
 			intermediateResult.CheckResults["bankCode"] = false
 			return intermediateResult
-	}	
+	}
 	intermediateResult.Messages = append(intermediateResult.Messages, "Bank code valid: " + bankCode)
 	intermediateResult.CheckResults["bankCode"] = true
 
