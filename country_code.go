@@ -124,8 +124,8 @@ var (
 )
 
 /*
-	Returns the allowed length of an IBAN code for a certain country.
-			or -1 if the country code could not be looked up.
+	Returns the 2-digit country code for a country name.
+	or an empty string if the country code could not be looked up.
 */
 func getCountryCode(countryName string) string {
 	var countryCode string
