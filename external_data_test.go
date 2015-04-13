@@ -27,9 +27,10 @@ package goiban
 import (
 	"database/sql"
 	"fmt"
+	"testing"
+
 	co "github.com/fourcube/goiban/countries"
 	_ "github.com/go-sql-driver/mysql"
-	"testing"
 )
 
 var (
@@ -60,5 +61,15 @@ func TestCanLoadBankInfoFromDatabase(t *testing.T) {
 	fmt.Println(bankInfo)
 	if bankInfo == nil {
 		t.Errorf("Cannot load data from db. Is it empty?")
+	}
+}
+
+func TestCanReadFromBelgiumXLSX(t *testing.T) {
+	ch := make(chan interface{})
+	go ReadFileToEntries("test/belgium.xlsx", &co.BelgiumFileEntry{}, ch)
+
+	peek := (<-ch).([]co.BelgiumFileEntry)
+	if peek[0].Name != "bpost bank" {
+		t.Errorf("Failed to read file.")
 	}
 }

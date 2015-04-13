@@ -27,8 +27,10 @@ package goiban
 import (
 	"database/sql"
 	"fmt"
+	"log"
 
 	co "github.com/fourcube/goiban/countries"
+	"github.com/tealeg/xlsx"
 )
 
 var (
@@ -41,9 +43,9 @@ var (
 type BankInfo struct {
 	Bankcode string `json:"bankCode"`
 	Name     string `json:"name"`
-	Zip      string `json:"zip"`
-	City     string `json:"city"`
-	Bic      string `json:"bic"`
+	Zip      string `json:"zip,omitempty"`
+	City     string `json:"city,omitempty"`
+	Bic      string `json:"bic,omitempty"`
 }
 
 func GetBic(iban *Iban, intermediateResult *ValidationResult, db *sql.DB) *ValidationResult {
@@ -119,7 +121,20 @@ func ReadFileToEntries(path string, t interface{}, out chan interface{}) {
 			}
 			out <- co.BundesbankStringToEntry(l)
 		}
+	case *co.BelgiumFileEntry:
+		file, err := xlsx.FileToSlice(path)
+		if err != nil {
+			log.Fatalf("Couldn't read belgium file, %v", err)
+		}
 
+		rows := file[0]
+		// Skip header
+		for _, r := range rows[2:] {
+			entries := co.BelgiumRowToEntry(r)
+			if len(entries) > 0 {
+				out <- entries
+			}
+		}
 	}
 	close(out)
 }
