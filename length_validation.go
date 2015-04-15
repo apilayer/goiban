@@ -28,6 +28,7 @@ var (
 	COUNTRY_CODE_TO_BANK_CODE_LENGTH = map[string]int{
 		"DE": 8,
 		"BE": 3,
+		"NL": 4,
 	}
 
 	COUNTRY_CODE_TO_LENGTH_MAP = map[string]int{

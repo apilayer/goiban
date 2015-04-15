@@ -73,3 +73,13 @@ func TestCanReadFromBelgiumXLSX(t *testing.T) {
 		t.Errorf("Failed to read file.")
 	}
 }
+
+func TestCanReadFromNetherlandsXLSX(t *testing.T) {
+	ch := make(chan interface{})
+	go ReadFileToEntries("test/netherlands.xlsx", &co.NetherlandsFileEntry{}, ch)
+
+	peek := (<-ch).(co.NetherlandsFileEntry)
+	if peek.Name != "ABN AMRO BANK N.V" {
+		t.Errorf("Failed to read file.")
+	}
+}
