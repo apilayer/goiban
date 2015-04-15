@@ -23,6 +23,8 @@ THE SOFTWARE.
 */
 package countries
 
+import "strings"
+
 type NetherlandsFileEntry struct {
 	Bankcode string
 	Name     string
@@ -33,8 +35,8 @@ type NetherlandsFileEntry struct {
 // Bankcodes
 func NetherlandsRowToEntry(row []string) NetherlandsFileEntry {
 	return NetherlandsFileEntry{
-		Bankcode: row[0],
-		Name:     row[2],
-		Bic:      row[1],
+		Bankcode: strings.TrimSpace(row[0]),
+		Name:     strings.TrimSpace(row[2]),
+		Bic:      strings.TrimSpace(row[1]),
 	}
 }

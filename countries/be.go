@@ -26,6 +26,7 @@ package countries
 import (
 	"fmt"
 	"strconv"
+	"strings"
 )
 
 type BelgiumFileEntry struct {
@@ -48,9 +49,9 @@ func BelgiumRowToEntry(row []string) []BelgiumFileEntry {
 
 	for lowerBankcodeBound <= upperBankcodeBound {
 		entries = append(entries, BelgiumFileEntry{
-			Bankcode: fmt.Sprintf("%03d", lowerBankcodeBound),
-			Name:     row[3],
-			Bic:      row[2],
+			Bankcode: strings.TrimSpace(fmt.Sprintf("%03d", lowerBankcodeBound)),
+			Name:     strings.TrimSpace(row[3]),
+			Bic:      strings.TrimSpace(row[2]),
 		})
 
 		lowerBankcodeBound++
