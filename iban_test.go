@@ -183,3 +183,14 @@ func TestInvalidCountryCodeToNumericString(t *testing.T) {
 		t.Errorf("Converted invalid code!")
 	}
 }
+
+func TestCanGenerateIBANFromValidData(t *testing.T) {
+	result := CalculateIBAN("BE", "539", "007547034")
+	if !result.Valid {
+		t.Errorf("expected result to be valid")
+	}
+
+	if result.Data != "BE68539007547034" {
+		t.Errorf("expected result iban to match %v != %v", result.Data, "BE68539007547034")
+	}
+}

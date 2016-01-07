@@ -65,6 +65,42 @@ func ParseToIban(val string) *Iban {
 	return iban
 }
 
+// CalculateIBAN returns a parser result with an IBAN
+func CalculateIBAN(countryCode string, bankCode string, account string) *ParserResult {
+	var iban string
+
+	cc := ExtractCountryCode(countryCode)
+	if cc == "" {
+		return NewParserResult(false, "Invalid country code.", "")
+	}
+
+	iban = strings.ToUpper(bankCode + account + countryCode + "00")
+	allowedLength := getAllowedLength(countryCode)
+	if allowedLength > 0 && len(iban) > allowedLength {
+		return NewParserResult(false, "Data too long. Check your country, bank code and account number for additional digits.", "")
+	}
+
+	// If we don't have any info on allowed length, what shall we do?
+
+	iban = toNumericString(iban)
+	intBuf := big.NewInt(0)
+	intBuf, ok := intBuf.SetString(iban, 10)
+	if !ok {
+		return NewParserResult(false, "Could not generate check digits.", "")
+	}
+
+	result := big.NewInt(98)
+	result.Sub(result, intBuf.Mod(intBuf, ibanMod))
+
+	iban = strings.ToUpper(countryCode + result.String() + bankCode + account)
+	finalValidation, success := extractBBAN(iban)
+	if success {
+		return NewParserResult(true, "", iban)
+	}
+
+	return NewParserResult(false, finalValidation.Message, "")
+}
+
 /*
 	Returns a pointer to a goiban.ValidationResult.
 */
