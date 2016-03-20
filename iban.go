@@ -94,6 +94,7 @@ func CalculateIBAN(countryCode string, bankCode string, account string) *ParserR
 	checkdigits.Sub(checkdigits, intBuf.Mod(intBuf, ibanMod))
 
 	iban = strings.ToUpper(fmt.Sprintf("%s%02d%s%s", countryCode, checkdigits, bankCode, account))
+
 	finalValidation, success := extractBBAN(iban)
 	if success {
 		return NewParserResult(true, "", iban)
