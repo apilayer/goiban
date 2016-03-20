@@ -25,6 +25,7 @@ THE SOFTWARE.
 package goiban
 
 import (
+	"fmt"
 	"math/big"
 	"strconv"
 	"strings"
@@ -89,10 +90,10 @@ func CalculateIBAN(countryCode string, bankCode string, account string) *ParserR
 		return NewParserResult(false, "Could not generate check digits.", "")
 	}
 
-	result := big.NewInt(98)
-	result.Sub(result, intBuf.Mod(intBuf, ibanMod))
+	checkdigits := big.NewInt(98)
+	checkdigits.Sub(checkdigits, intBuf.Mod(intBuf, ibanMod))
 
-	iban = strings.ToUpper(countryCode + result.String() + bankCode + account)
+	iban = strings.ToUpper(fmt.Sprintf("%s%02d%s%s", countryCode, checkdigits, bankCode, account))
 	finalValidation, success := extractBBAN(iban)
 	if success {
 		return NewParserResult(true, "", iban)

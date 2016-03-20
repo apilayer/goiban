@@ -194,3 +194,14 @@ func TestCanGenerateIBANFromValidData(t *testing.T) {
 		t.Errorf("expected result iban to match %v != %v", result.Data, "BE68539007547034")
 	}
 }
+
+func TestCanGenerateIBANFromValidDataEnsureCheckdigitsLeadingZeroPresent(t *testing.T) {
+	result := CalculateIBAN("DE", "1", "9")
+	if !result.Valid {
+		t.Errorf("expected result to be valid")
+	}
+
+	if result.Data != "DE0819" {
+		t.Errorf("expected result iban to match %v != %v", result.Data, "DE0819")
+	}
+}
