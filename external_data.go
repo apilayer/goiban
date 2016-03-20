@@ -56,6 +56,11 @@ func GetBic(iban *Iban, intermediateResult *ValidationResult, db *sql.DB) *Valid
 		return intermediateResult
 	}
 
+	if len(iban.bban) < length {
+		intermediateResult.Messages = append(intermediateResult.Messages, "Cannot get BIC for BBAN "+iban.bban)
+		return intermediateResult
+	}
+
 	bankCode := iban.bban[0:length]
 	bankData := getBankInformationByCountryAndBankCodeFromDb(iban.countryCode, bankCode, db)
 
