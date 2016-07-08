@@ -151,6 +151,17 @@ func ReadFileToEntries(path string, t interface{}, out chan interface{}) {
 		for _, r := range rows[2:] {
 			out <- co.NetherlandsRowToEntry(r)
 		}
+	case *co.LuxembourgFileEntry:
+		file, err := xlsx.FileToSlice(path)
+		if err != nil {
+			log.Fatalf("Couldn't read luxembourg file, %v", err)
+		}
+
+		rows := file[0]
+		// Skip header
+		for _, r := range rows[2:] {
+			out <- co.LuxembourgRowToEntry(r)
+		}
 	}
 
 	close(out)
