@@ -23,7 +23,11 @@ THE SOFTWARE.
 */
 package countries
 
-import "strings"
+import (
+	"strconv"
+	"strings"
+    "fmt"
+)
 
 type LuxembourgFileEntry struct {
 	Bankcode string
@@ -31,12 +35,18 @@ type LuxembourgFileEntry struct {
 	Bic      string
 }
 
-// Return a slice of BankEntries because BICs can map to multiple
-// Bankcodes
+// Returns a single file entry
 func LuxembourgRowToEntry(row []string) LuxembourgFileEntry {
+    bankCode, err := strconv.Atoi(row[1])
+    bankCodeStr := ""
+
+    if err == nil {
+        bankCodeStr = strings.TrimSpace(fmt.Sprintf("%03d", bankCode))
+    }
+
 	return LuxembourgFileEntry{
 		Name:     strings.TrimSpace(row[0]),
-		Bankcode: strings.TrimSpace(row[1]),
+		Bankcode: bankCodeStr,
 		Bic:      strings.TrimSpace(row[2]),
 	}
 }
