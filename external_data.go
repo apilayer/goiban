@@ -117,6 +117,26 @@ func ReadFileToEntries(path string, t interface{}, out chan interface{}) {
 	switch t := t.(type) {
 	default:
 		fmt.Println("default:", t)
+	case *co.AustriaBankFileEntry:
+		go readLines(path, cLines)
+		var temp string
+		temp = <-cLines
+		if temp == "" {
+			out <- nil
+			return
+		}
+		var num int
+		for l := range cLines {
+			num++
+			if num < 7 { //skip first seven lines
+				continue
+			}
+			if len(l) == 0 {
+				out <- nil
+				return
+			}
+			out <- co.AustriaBankStringToEntry(l)
+		}
 	case *co.BundesbankFileEntry:
 		go readLines(path, cLines)
 		for l := range cLines {

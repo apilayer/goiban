@@ -37,6 +37,24 @@ var (
 	db, err = sql.Open("mysql", "root:root@/goiban?charset=utf8")
 )
 
+func TestCanReadFromAustriaFile(t *testing.T) {
+	ch := make(chan interface{})
+	go ReadFileToEntries("test/austria.csv", &co.AustriaBankFileEntry{}, ch)
+
+	peek := (<-ch).(*co.AustriaBankFileEntry)
+	if peek.Name == "" {
+		t.Errorf("Failed to read file.")
+	}
+}
+
+func TestCannotReadFromNonExistingAustriaFile(t *testing.T) {
+	ch := make(chan interface{})
+	go ReadFileToEntries("test/austria_blablablabla.csv", &co.AustriaBankFileEntry{}, ch)
+	result := <-ch
+	if result != nil {
+		t.Errorf("Failed to read file.")
+	}
+}
 func TestCanReadFromBundesbankFile(t *testing.T) {
 	ch := make(chan interface{})
 	go ReadFileToEntries("test/bundesbank.txt", &co.BundesbankFileEntry{}, ch)
