@@ -26,6 +26,7 @@ package goiban
 
 import (
 	"database/sql"
+	"fmt"
 	"testing"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -73,13 +74,13 @@ func TestCannotReadFromNonExistingBundesbankFile(t *testing.T) {
 	}
 }
 
-/*func TestCanLoadBankInfoFromDatabase(t *testing.T) {
+func TestCanLoadBankInfoFromDatabase(t *testing.T) {
 	bankInfo := getBankInformationByCountryAndBankCodeFromDb("DE", "84050000", db)
 	fmt.Println(bankInfo)
 	if bankInfo == nil {
 		t.Errorf("Cannot load data from db. Is it empty?")
 	}
-} */
+}
 
 func TestCanReadFromBelgiumXLSX(t *testing.T) {
 	ch := make(chan interface{})
