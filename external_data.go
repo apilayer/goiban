@@ -29,7 +29,7 @@ import (
 	"fmt"
 	"log"
 
-	co "github.com/fourcube/goiban/countries"
+	co "github.com/stefan93/goiban/countries"
 	"github.com/tealeg/xlsx"
 )
 
@@ -181,6 +181,15 @@ func ReadFileToEntries(path string, t interface{}, out chan interface{}) {
 		// Skip header
 		for _, r := range rows[2:] {
 			out <- co.LuxembourgRowToEntry(r)
+		}
+	case *co.SwitzerlandBankFileEntry:
+		go readLines(path, cLines)
+		for l := range cLines {
+			if len(l) == 0 {
+				out <- nil
+				return
+			}
+			out <- co.SwitzerlandBankStringToEntry(l)
 		}
 	}
 
