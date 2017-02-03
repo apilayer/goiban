@@ -27,6 +27,7 @@ package goiban
 import (
 	"database/sql"
 	"strconv"
+	"strings"
 )
 
 var (
@@ -56,6 +57,7 @@ func ValidateBankCode(iban *Iban, intermediateResult *ValidationResult, db *sql.
 	}
 
 	bankCode := iban.bban[0:length]
+	bankCode = strings.TrimLeft(bankCode, "0")
 
 	var res int
 	err := SELECT_BY_BANK_CODE_STMT.QueryRow(bankCode, iban.countryCode).Scan(&res)
