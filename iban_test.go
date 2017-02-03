@@ -201,7 +201,7 @@ func TestCanGenerateIBANFromValidDataEnsureCheckdigitsLeadingZeroPresent(t *test
 		t.Errorf("expected result to be valid")
 	}
 
-	if result.Data != "DE0819" {
+	if result.Data != "DE22000000010000000009" {
 		t.Errorf("expected result iban to match %v != %v", result.Data, "DE0819")
 	}
 }
