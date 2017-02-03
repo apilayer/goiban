@@ -75,6 +75,9 @@ func CalculateIBAN(countryCode string, bankCode string, account string) *ParserR
 		return NewParserResult(false, "Invalid country code.", "")
 	}
 
+	bankCode = padBankCode(bankCode, countryCode)
+	account = padAccountNumber(bankCode, account, countryCode)
+
 	iban = strings.ToUpper(bankCode + account + countryCode + "00")
 	allowedLength := getAllowedLength(countryCode)
 	if allowedLength > 0 && len(iban) > allowedLength {
@@ -101,6 +104,32 @@ func CalculateIBAN(countryCode string, bankCode string, account string) *ParserR
 	}
 
 	return NewParserResult(false, finalValidation.Message, "")
+}
+
+func padBankCode(bankCode string, countryCode string) string {
+	if length := COUNTRY_CODE_TO_BANK_CODE_LENGTH[countryCode]; length > 0 {
+		for len(bankCode) < length {
+			bankCode = "0" + bankCode
+		}
+	}
+
+	return bankCode
+}
+
+func padAccountNumber(bankCode string, accountNumber string, countryCode string) string {
+	bankCodeLength := len(bankCode)
+	totalLength := COUNTRY_CODE_TO_LENGTH_MAP[countryCode]
+	expectedLength := totalLength - bankCodeLength - 4 // subtract country code and check digits
+
+	if expectedLength < 1 {
+		return accountNumber
+	}
+
+	for len(accountNumber) < expectedLength {
+		accountNumber = "0" + accountNumber
+	}
+
+	return accountNumber
 }
 
 /*
