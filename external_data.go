@@ -191,6 +191,16 @@ func ReadFileToEntries(path string, t interface{}, out chan interface{}) {
 			}
 			out <- co.SwitzerlandBankStringToEntry(l)
 		}
+	case *co.LiechtensteinFileEntry:
+		file, err := xlsx.FileToSlice(path)
+		if err != nil {
+			out <- nil
+			return
+		}
+		rows := file[0]
+		for _, r := range rows[1:] {
+			out <- co.LiechtensteinRowToEntry(r)
+		}
 	}
 
 	close(out)
