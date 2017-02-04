@@ -37,6 +37,7 @@ type AustriaBankFileEntry struct {
 
 func AustriaBankStringToEntry(val string) *AustriaBankFileEntry {
 	r := csv.NewReader(strings.NewReader(val))
+	r.LazyQuotes = true
 	r.Comma = ';'
 	records, _ := r.ReadAll()
 	return &AustriaBankFileEntry{

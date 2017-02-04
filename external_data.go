@@ -128,7 +128,7 @@ func ReadFileToEntries(path string, t interface{}, out chan interface{}) {
 		var num int
 		for l := range cLines {
 			num++
-			if num < 7 { //skip first seven lines
+			if num < 7 { //skip first six lines
 				continue
 			}
 			if len(l) == 0 {
