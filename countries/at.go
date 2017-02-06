@@ -26,6 +26,7 @@ package countries
 
 import (
 	"encoding/csv"
+	"fmt"
 	"strings"
 )
 
@@ -43,6 +44,6 @@ func AustriaBankStringToEntry(val string) *AustriaBankFileEntry {
 	return &AustriaBankFileEntry{
 		records[0][6],
 		records[0][19],
-		records[0][2],
+		fmt.Sprintf("%s05", records[0][2]),
 	}
 }

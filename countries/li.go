@@ -24,6 +24,7 @@ THE SOFTWARE.
 package countries
 
 import "strings"
+import "fmt"
 
 type LiechtensteinFileEntry struct {
 	Bankcode string
@@ -37,6 +38,6 @@ func LiechtensteinRowToEntry(row []string) LiechtensteinFileEntry {
 	return LiechtensteinFileEntry{
 		Name:     strings.TrimSpace(row[0]),
 		Bic:      strings.TrimSpace(row[1]),
-		Bankcode: strings.TrimSpace(row[2]),
+		Bankcode: fmt.Sprintf("%05s", strings.TrimSpace(row[2])),
 	}
 }

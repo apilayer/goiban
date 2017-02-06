@@ -24,6 +24,10 @@ THE SOFTWARE.
 
 package countries
 
+import (
+	"fmt"
+)
+
 /*
 	Describes the field width of the fixed width text file
 	which can be found at
@@ -45,8 +49,8 @@ func SwitzerlandBankStringToEntry(val string) *SwitzerlandBankFileEntry {
 	runeVal := []rune(val)
 
 	return &SwitzerlandBankFileEntry{
-		toTrimmedString(runeVal[2:6]),
-		toTrimmedString(runeVal[11:15]),
+		fmt.Sprintf("%05s", toTrimmedString(runeVal[2:6])),
+		fmt.Sprintf("%05s", toTrimmedString(runeVal[11:15])),
 		toTrimmedString(runeVal[39:54]),
 		toTrimmedString(runeVal[54:114]),
 		toTrimmedString(runeVal[114:149]),
