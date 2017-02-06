@@ -29,7 +29,7 @@ import (
 	"fmt"
 	"log"
 
-	co "github.com/stefan93/goiban/countries"
+	co "github.com/fourcube/goiban/countries"
 	"github.com/tealeg/xlsx"
 )
 
