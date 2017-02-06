@@ -29,7 +29,7 @@ import (
 	"testing"
 
 	_ "github.com/go-sql-driver/mysql"
-	co "github.com/stefan93/goiban/countries"
+	co "github.com/fourcube/goiban/countries"
 )
 
 var (
