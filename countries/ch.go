@@ -38,6 +38,7 @@ type SwitzerlandFileEntry struct {
 func SwitzerlandRowToEntry(row []string, bankCodeLengthMap map[string]int) SwitzerlandFileEntry {
 	bankCode, err := strconv.Atoi(row[1])
 	bankCodeNew, errNew := strconv.Atoi(row[3])
+	bankCodeLength := bankCodeLengthMap["CH"]
 	bankCodeStr := ""
 
 	if err == nil {
@@ -47,6 +48,8 @@ func SwitzerlandRowToEntry(row []string, bankCodeLengthMap map[string]int) Switz
 	if errNew == nil && bankCodeNew > 0 {
 		bankCodeStr = strconv.Itoa(bankCodeNew)
 	}
+
+	bankCodeStr = PadLeftZero(bankCodeStr, bankCodeLength)
 
 	return SwitzerlandFileEntry{
 		Name:     strings.TrimSpace(row[12]),

@@ -1,10 +1,6 @@
 package countries
 
-import "strconv"
-
-func PadLeftZero(n int, length int) string {
-	s := strconv.Itoa(n)
-
+func PadLeftZero(s string, length int) string {
 	for len(s) < length {
 		s = "0" + s
 	}

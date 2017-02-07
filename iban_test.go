@@ -191,7 +191,7 @@ func TestCanGenerateIBANFromValidData(t *testing.T) {
 	}
 
 	if result.Data != "BE68539007547034" {
-		t.Errorf("expected result iban to match %v != %v", result.Data, "BE68539007547034")
+		t.Errorf("expected result iban to match, %v != %v", result.Data, "BE68539007547034")
 	}
 }
 
@@ -202,6 +202,6 @@ func TestCanGenerateIBANFromValidDataEnsureCheckdigitsLeadingZeroPresent(t *test
 	}
 
 	if result.Data != "DE22000000010000000009" {
-		t.Errorf("expected result iban to match %v != %v", result.Data, "DE0819")
+		t.Errorf("expected result iban to match, %v != %v", result.Data, "DE22000000010000000009")
 	}
 }
