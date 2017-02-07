@@ -29,11 +29,6 @@ import (
 	"fmt"
 )
 
-/*
-	Describes the field width of the fixed width text file
-	which can be found at
-	https://www.six-interbank-clearing.com/dam/downloads/en/bc_bank_master/bc_records.pdf
-*/
 
 type SwitzerlandBankFileEntry struct {
 	BankCode    string //2-6
