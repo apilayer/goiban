@@ -64,6 +64,13 @@ func TestCanLoadBankInfoFromDatabase(t *testing.T) {
 	}
 }
 
+func TestCanLoadBankInfoFromDatabaseLeadingZeros(t *testing.T) {
+	bankInfo := getBankInformationByCountryAndBankCodeFromDb("BE", "001", db)
+	if bankInfo == nil {
+		t.Errorf("Cannot load data from db. Is it empty?")
+	}
+}
+
 func TestCanReadFromBelgiumXLSX(t *testing.T) {
 	ch := make(chan interface{})
 	go ReadFileToEntries("test/belgium.xlsx", &co.BelgiumFileEntry{}, ch)
