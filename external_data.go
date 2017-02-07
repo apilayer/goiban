@@ -29,6 +29,8 @@ import (
 	"fmt"
 	"log"
 
+	"strings"
+
 	co "github.com/fourcube/goiban/countries"
 	"github.com/tealeg/xlsx"
 )
@@ -91,6 +93,8 @@ func getBankInformationByCountryAndBankCodeFromDb(countryCode string, bankCode s
 	}
 
 	var dbBankcode, dbName, dbZip, dbCity, dbBic string
+
+	bankCode = strings.TrimLeft(bankCode, "0")
 
 	err := SELECT_BANK_INFORMATION_STMT.QueryRow(bankCode, countryCode).Scan(&dbBankcode, &dbName, &dbZip, &dbCity, &dbBic)
 
@@ -202,6 +206,5 @@ func ReadFileToEntries(path string, t interface{}, out chan interface{}) {
 			out <- co.LiechtensteinRowToEntry(r)
 		}
 	}
-
 	close(out)
 }
