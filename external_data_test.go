@@ -26,17 +26,34 @@ package goiban
 
 import (
 	"database/sql"
-	"fmt"
 	"testing"
 
-	co "github.com/fourcube/goiban/countries"
 	_ "github.com/go-sql-driver/mysql"
+	co "github.com/fourcube/goiban/countries"
 )
 
 var (
 	db, err = sql.Open("mysql", "root:root@/goiban?charset=utf8")
 )
 
+func TestCanReadFromAustriaFile(t *testing.T) {
+	ch := make(chan interface{})
+	go ReadFileToEntries("test/austria.csv", &co.AustriaBankFileEntry{}, ch)
+
+	peek := (<-ch).(*co.AustriaBankFileEntry)
+	if peek.Name == "" {
+		t.Errorf("Failed to read file.")
+	}
+}
+
+func TestCannotReadFromNonExistingAustriaFile(t *testing.T) {
+	ch := make(chan interface{})
+	go ReadFileToEntries("test/austria_blablablabla.csv", &co.AustriaBankFileEntry{}, ch)
+	result := <-ch
+	if result != nil {
+		t.Errorf("Failed to read file.")
+	}
+}
 func TestCanReadFromBundesbankFile(t *testing.T) {
 	ch := make(chan interface{})
 	go ReadFileToEntries("test/bundesbank.txt", &co.BundesbankFileEntry{}, ch)
@@ -56,13 +73,13 @@ func TestCannotReadFromNonExistingBundesbankFile(t *testing.T) {
 	}
 }
 
-func TestCanLoadBankInfoFromDatabase(t *testing.T) {
+/*func TestCanLoadBankInfoFromDatabase(t *testing.T) {
 	bankInfo := getBankInformationByCountryAndBankCodeFromDb("DE", "84050000", db)
 	fmt.Println(bankInfo)
 	if bankInfo == nil {
 		t.Errorf("Cannot load data from db. Is it empty?")
 	}
-}
+}*/
 
 func TestCanLoadBankInfoFromDatabaseLeadingZeros(t *testing.T) {
 	bankInfo := getBankInformationByCountryAndBankCodeFromDb("BE", "001", db)
@@ -87,6 +104,40 @@ func TestCanReadFromNetherlandsXLSX(t *testing.T) {
 
 	peek := (<-ch).(co.NetherlandsFileEntry)
 	if peek.Name != "ABN AMRO BANK N.V" {
+		t.Errorf("Failed to read file.")
+	}
+}
+func TestCanReadFromSwitzerlandFile(t *testing.T) {
+	ch := make(chan interface{})
+	go ReadFileToEntries("test/switzerland.txt", &co.SwitzerlandBankFileEntry{}, ch)
+
+	peek := (<-ch).(*co.SwitzerlandBankFileEntry)
+	if peek.Bic != "SNBZCHZZXXX" {
+		t.Errorf("Failed to read file.")
+	}
+}
+
+func TestCannotReadFromNonExistingSwitzerlandFile(t *testing.T) {
+	ch := make(chan interface{})
+	go ReadFileToEntries("test/switzerland_blablablabla.txt", &co.SwitzerlandBankFileEntry{}, ch)
+	result := <-ch
+	if result != nil {
+		t.Errorf("Failed to read file.")
+	}
+}
+func TestCanReadFromLiechtensteinXLSX(t *testing.T) {
+	ch := make(chan interface{})
+	go ReadFileToEntries("test/liechtenstein.xlsx", &co.LiechtensteinFileEntry{}, ch)
+	peek := (<-ch).(co.LiechtensteinFileEntry)
+	if peek.Bic != "BALPLI22" {
+		t.Errorf("Failed to read file." + peek.Bic)
+	}
+}
+func TestCannotReadFromNonExistingLiechtensteinFile(t *testing.T) {
+	ch := make(chan interface{})
+	go ReadFileToEntries("test/lliechtenstein_blablablabla.xlsx", &co.LiechtensteinFileEntry{}, ch)
+	result := <-ch
+	if result != nil {
 		t.Errorf("Failed to read file.")
 	}
 }

@@ -1,24 +1,35 @@
 package countries
 
-import "testing"
+import (
+	"testing"
+)
 
-func TestCanConvertSliceToSwitzerlandBankEntry(t *testing.T) {
-	countryCodeToBankCodeMap := map[string]int{
-		"CH": 5,
+func TestCanConvertStringToSwitzerlandBankEntry(t *testing.T) {
+	data := "088792 0000     0879298792 120091124301BNP PAR SEC SERBNP PARIBAS SECURITIES SERVICES                             Selnaustrasse 16                   Postfach 2119                      8022      Zürich                             058 212 63 00     058 212 63 60            87-230511-3 PARBCHZZXXX   "
+	result := SwitzerlandBankStringToEntry(data)
+
+	if result.BankCode != "8792" {
+		t.Errorf("Couldn't parse bank code: ", result.BankCode)
 	}
-
-	data := []string{"4", "4750", "0000", "4835", "047501", "4835", "1", "20061020", "1", "1", "2", "CS (Schweiz) AG", "Credit Suisse (Schweiz) AG", "Rue du  Simplon 50", "Case postale 210", "1800", "Vevey 1", "021 925 01 11", "021 921 90 87", "", "", "*12-35-2", "CRESCHZZ18A"}
-	entry := SwitzerlandRowToEntry(data, countryCodeToBankCodeMap)
-
-	if entry.Bankcode != "4835" {
-		t.Errorf("expected 04835 as bankcode, got %v", entry.Bankcode)
+	if result.NewBankCode != "" {
+		t.Errorf("Couldn't parse new bank code: ", result.NewBankCode)
 	}
-
-	if entry.Bic != "CRESCHZZ18A" {
-		t.Errorf("expected CRESCHZZ18A as bic, got %v", entry.Bic)
+	if result.Address != "Selnaustrasse 16" {
+		t.Errorf("Couldn't parse address: ", result.Address)
 	}
-
-	if entry.Name != "Credit Suisse (Schweiz) AG" {
-		t.Errorf("Credit Suisse (Schweiz) AG as name, got %v", entry.Name)
+	if result.Zip != "8022" {
+		t.Errorf("Couldn't parse zip: ", result.Zip)
+	}
+	if result.Place != "Zürich" {
+		t.Errorf("Couldn't parse place: ", result.Place)
+	}
+	if result.ShortName != "BNP PAR SEC SER" {
+		t.Errorf("Couldn't parse short name: ", result.ShortName)
+	}
+	if result.BankName != "BNP PARIBAS SECURITIES SERVICES" {
+		t.Errorf("Couldn't parse bank name: ", result.BankName)
+	}
+	if result.Bic != "PARBCHZZXXX" {
+		t.Errorf("Couldn't parse bic.", result.Bic)
 	}
 }

@@ -1,8 +1,7 @@
 /*
 The MIT License (MIT)
 
-
-Copyright (c) 2016 Chris Grieger
+Copyright (c) 2014 Chris Grieger
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -26,32 +25,25 @@ THE SOFTWARE.
 package countries
 
 import (
+	"encoding/csv"
 	"fmt"
+	"strings"
 )
 
-
-type SwitzerlandBankFileEntry struct {
-	BankCode    string //2-6
-	NewBankCode string //11-15
-	ShortName   string //39-54
-	BankName    string //54-114
-	Address     string //116-151
-	Zip         string //178-188
-	Place       string //194-229
-	Bic         string //290-304
+type AustriaBankFileEntry struct {
+	Name     string
+	Bic      string
+	Bankcode string
 }
 
-func SwitzerlandBankStringToEntry(val string) *SwitzerlandBankFileEntry {
-	runeVal := []rune(val)
-
-	return &SwitzerlandBankFileEntry{
-		fmt.Sprintf("%05s", toTrimmedString(runeVal[2:6])),
-		fmt.Sprintf("%05s", toTrimmedString(runeVal[11:15])),
-		toTrimmedString(runeVal[39:54]),
-		toTrimmedString(runeVal[54:114]),
-		toTrimmedString(runeVal[114:149]),
-		toTrimmedString(runeVal[178:188]),
-		toTrimmedString(runeVal[194:229]),
-		toTrimmedString(runeVal[284:298]),
+func AustriaBankStringToEntry(val string) *AustriaBankFileEntry {
+	r := csv.NewReader(strings.NewReader(val))
+	r.LazyQuotes = true
+	r.Comma = ';'
+	records, _ := r.ReadAll()
+	return &AustriaBankFileEntry{
+		records[0][6],
+		records[0][19],
+		fmt.Sprintf("%s05", records[0][2]),
 	}
 }
