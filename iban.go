@@ -80,8 +80,8 @@ func CalculateIBAN(countryCode string, bankCode string, account string) *ParserR
 
 	iban = strings.ToUpper(bankCode + account + countryCode + "00")
 	allowedLength := getAllowedLength(countryCode)
-	if allowedLength > 0 && len(iban) > allowedLength {
-		return NewParserResult(false, "Data too long. Check your country, bank code and account number for additional digits.", "")
+	if allowedLength > 0 && len(iban) != allowedLength {
+		return NewParserResult(false, "Invalid IBAN length. Check your country, bank code and account number for additional digits.", "")
 	}
 
 	// If we don't have any info on allowed length, what shall we do?
@@ -227,12 +227,10 @@ func extractBBAN(val string) (*ParserResult, bool) {
 		return NewParserResult(false, "Invalid BBAN length.", ""), false
 	}
 
-	// we can do a more accurate check for some countries
-	// see static_data.go
 	countryCode := ExtractCountryCode(val)
 	allowedLength := getAllowedLength(countryCode)
-	if allowedLength > 0 && (len(val) > allowedLength) {
-		return NewParserResult(false, "BBAN length invalid. Maximum for "+countryCode+" is "+strconv.Itoa(allowedLength)+".", ""), false
+	if allowedLength > 0 && (len(val) != allowedLength) {
+		return NewParserResult(false, "IBAN length invalid. Expected length for "+countryCode+" is "+strconv.Itoa(allowedLength)+".", ""), false
 	}
 
 	bban := strings.ToUpper(val[4:len(val)])

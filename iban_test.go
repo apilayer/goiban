@@ -46,6 +46,14 @@ func TestCanCheckIbanValidity(t *testing.T) {
 	}
 }
 
+func TestCanCheckIbanTooLong(t *testing.T) {
+	input := "GB29 NWBK 6016 1331 9268 19 21"
+	parsedIban := ParseToIban(input)
+	if parsedIban != nil {
+		t.Errorf("BBAN was too long should not have succeeded.")
+	}
+}
+
 func TestCanCheckIbanParseable(t *testing.T) {
 	input := "GB29 NWBK 6016 1331 9268 19"
 	result := IsParseable(input)
