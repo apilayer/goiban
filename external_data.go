@@ -119,6 +119,26 @@ func ReadFileToEntries(path string, t interface{}, out chan interface{}) {
 	switch t := t.(type) {
 	default:
 		fmt.Println("default:", t)
+	case *co.AustriaBankFileEntry:
+		go readLines(path, cLines)
+		var temp string
+		temp = <-cLines
+		if temp == "" {
+			out <- nil
+			return
+		}
+		var num int
+		for l := range cLines {
+			num++
+			if num < 7 { //skip first six lines
+				continue
+			}
+			if len(l) == 0 {
+				out <- nil
+				return
+			}
+			out <- co.AustriaBankStringToEntry(l, COUNTRY_CODE_TO_BANK_CODE_LENGTH)
+		}
 	case *co.BundesbankFileEntry:
 		go readLines(path, cLines)
 		for l := range cLines {
@@ -174,6 +194,16 @@ func ReadFileToEntries(path string, t interface{}, out chan interface{}) {
 		// Skip header
 		for _, r := range rows[2:] {
 			out <- co.SwitzerlandRowToEntry(r, COUNTRY_CODE_TO_BANK_CODE_LENGTH)
+		}
+	case *co.LiechtensteinFileEntry:
+		file, err := xlsx.FileToSlice(path)
+		if err != nil {
+			out <- nil
+			return
+		}
+		rows := file[0]
+		for _, r := range rows[1:] {
+			out <- co.LiechtensteinRowToEntry(r, COUNTRY_CODE_TO_BANK_CODE_LENGTH)
 		}
 	}
 	close(out)

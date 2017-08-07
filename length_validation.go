@@ -31,6 +31,8 @@ var (
 		"NL": 4,
 		"LU": 3,
 		"CH": 5,
+		"AT": 5,
+		"LI": 5,
 	}
 
 	COUNTRY_CODE_TO_LENGTH_MAP = map[string]int{
