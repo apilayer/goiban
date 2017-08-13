@@ -37,6 +37,24 @@ var (
 	db, err = sql.Open("mysql", "root:root@/goiban?charset=utf8")
 )
 
+func TestCanReadFromAustriaFile(t *testing.T) {
+	ch := make(chan interface{})
+	go ReadFileToEntries("test/austria.csv", &co.AustriaBankFileEntry{}, ch)
+
+	peek := (<-ch).(*co.AustriaBankFileEntry)
+	if peek.Name == "" {
+		t.Errorf("Failed to read file.")
+	}
+}
+
+func TestCannotReadFromNonExistingAustriaFile(t *testing.T) {
+	ch := make(chan interface{})
+	go ReadFileToEntries("test/austria_blablablabla.csv", &co.AustriaBankFileEntry{}, ch)
+	result := <-ch
+	if result != nil {
+		t.Errorf("Failed to read file.")
+	}
+}
 func TestCanReadFromBundesbankFile(t *testing.T) {
 	ch := make(chan interface{})
 	go ReadFileToEntries("test/bundesbank.txt", &co.BundesbankFileEntry{}, ch)
@@ -87,6 +105,32 @@ func TestCanReadFromNetherlandsXLSX(t *testing.T) {
 
 	peek := (<-ch).(co.NetherlandsFileEntry)
 	if peek.Name != "ABN AMRO BANK N.V" {
+		t.Errorf("Failed to read file.")
+	}
+}
+func TestCanReadFromSwitzerlandFile(t *testing.T) {
+	ch := make(chan interface{})
+	go ReadFileToEntries("test/switzerland.xlsx", &co.SwitzerlandFileEntry{}, ch)
+
+	peek := (<-ch).(co.SwitzerlandFileEntry)
+	if peek.Bic != "SNBZCHZZXXX" {
+		t.Errorf("Failed to read file.")
+	}
+}
+
+func TestCanReadFromLiechtensteinXLSX(t *testing.T) {
+	ch := make(chan interface{})
+	go ReadFileToEntries("test/liechtenstein.xlsx", &co.LiechtensteinFileEntry{}, ch)
+	peek := (<-ch).(co.LiechtensteinFileEntry)
+	if peek.Bic != "BALPLI22" {
+		t.Errorf("Failed to read file." + peek.Bic)
+	}
+}
+func TestCannotReadFromNonExistingLiechtensteinFile(t *testing.T) {
+	ch := make(chan interface{})
+	go ReadFileToEntries("test/lliechtenstein_blablablabla.xlsx", &co.LiechtensteinFileEntry{}, ch)
+	result := <-ch
+	if result != nil {
 		t.Errorf("Failed to read file.")
 	}
 }
