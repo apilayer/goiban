@@ -110,22 +110,14 @@ func TestCanReadFromNetherlandsXLSX(t *testing.T) {
 }
 func TestCanReadFromSwitzerlandFile(t *testing.T) {
 	ch := make(chan interface{})
-	go ReadFileToEntries("test/switzerland.txt", &co.SwitzerlandBankFileEntry{}, ch)
+	go ReadFileToEntries("test/switzerland.xlsx", &co.SwitzerlandFileEntry{}, ch)
 
-	peek := (<-ch).(*co.SwitzerlandBankFileEntry)
+	peek := (<-ch).(co.SwitzerlandFileEntry)
 	if peek.Bic != "SNBZCHZZXXX" {
 		t.Errorf("Failed to read file.")
 	}
 }
 
-func TestCannotReadFromNonExistingSwitzerlandFile(t *testing.T) {
-	ch := make(chan interface{})
-	go ReadFileToEntries("test/switzerland_blablablabla.txt", &co.SwitzerlandBankFileEntry{}, ch)
-	result := <-ch
-	if result != nil {
-		t.Errorf("Failed to read file.")
-	}
-}
 func TestCanReadFromLiechtensteinXLSX(t *testing.T) {
 	ch := make(chan interface{})
 	go ReadFileToEntries("test/liechtenstein.xlsx", &co.LiechtensteinFileEntry{}, ch)
