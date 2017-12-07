@@ -134,3 +134,15 @@ func TestCannotReadFromNonExistingLiechtensteinFile(t *testing.T) {
 		t.Errorf("Failed to read file.")
 	}
 }
+
+func TestSpecialRuleForCommerzbankBic(t *testing.T) {
+	input := "DE12120400000052065002"
+	iban := ParseToIban(input)
+	result := NewValidationResult(true, "", input)
+
+	result = GetBic(iban, result, db)
+
+	if result.BankData.Bic != "COBADEFFXXX" {
+		t.Errorf("Expected Bic COBADEFFXXX, was %v", result.BankData.Bic)
+	}
+}

@@ -69,6 +69,15 @@ func GetBic(iban *Iban, intermediateResult *ValidationResult, db *sql.DB) *Valid
 		return intermediateResult
 	}
 
+	// issue #17 - Custom Rule for Commerzbank
+	//
+	// See https://www.eckd-kigst.de/fileadmin/user_upload/eckd/Downloads_KFM/Deutsche_Bundesbank_Uebersicht_der_IBAN_Regeln_Stand_Juni_2013.pdf
+	if iban.countryCode == "DE" &&
+		len(bankData.Bankcode) > 6 &&
+		bankData.Bankcode[3:6] == "400" {
+		bankData.Bic = "COBADEFFXXX"
+	}
+
 	intermediateResult.BankData = *bankData
 
 	return intermediateResult
