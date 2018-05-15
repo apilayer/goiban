@@ -29,6 +29,7 @@ import (
 	"fmt"
 	"log"
 
+	data "github.com/fourcube/goiban-data"
 	co "github.com/fourcube/goiban/countries"
 	"github.com/tealeg/xlsx"
 )
@@ -40,15 +41,7 @@ var (
 	SELECT_BANK_INFORMATION_STMT *sql.Stmt
 )
 
-type BankInfo struct {
-	Bankcode string `json:"bankCode"`
-	Name     string `json:"name"`
-	Zip      string `json:"zip,omitempty"`
-	City     string `json:"city,omitempty"`
-	Bic      string `json:"bic,omitempty"`
-}
-
-func GetBic(iban *Iban, intermediateResult *ValidationResult, db *sql.DB) *ValidationResult {
+func GetBic(iban *Iban, intermediateResult *ValidationResult, repo data.BankDataRepository) *ValidationResult {
 	length, ok := COUNTRY_CODE_TO_BANK_CODE_LENGTH[(iban.countryCode)]
 
 	if !ok {
@@ -62,7 +55,7 @@ func GetBic(iban *Iban, intermediateResult *ValidationResult, db *sql.DB) *Valid
 	}
 
 	bankCode := iban.bban[0:length]
-	bankData := getBankInformationByCountryAndBankCodeFromDb(iban.countryCode, bankCode, db)
+	bankData := GetBankInformationByCountryAndBankCodeFromDb(iban.countryCode, bankCode, repo)
 
 	if bankData == nil {
 		intermediateResult.Messages = append(intermediateResult.Messages, "No BIC found for bank code: "+bankCode)
@@ -93,26 +86,24 @@ func prepareSelectBankInformationStatement(db *sql.DB) {
 
 }
 
-func getBankInformationByCountryAndBankCodeFromDb(countryCode string, bankCode string, db *sql.DB) *BankInfo {
+func GetBankInformationByCountryAndBankCodeFromDb(countryCode string, bankCode string, repo data.BankDataRepository) *data.BankInfo {
 
-	if SELECT_BANK_INFORMATION_STMT == nil {
-		prepareSelectBankInformationStatement(db)
-	}
+	// if SELECT_BANK_INFORMATION_STMT == nil {
+	// 	prepareSelectBankInformationStatement(db)
+	// }
 
-	var dbBankcode, dbName, dbZip, dbCity, dbBic string
+	// var dbBankcode, dbName, dbZip, dbCity, dbBic string
 
 	//bankCode = strings.TrimLeft(bankCode, "0")
 
-	err := SELECT_BANK_INFORMATION_STMT.QueryRow(bankCode, countryCode).Scan(&dbBankcode, &dbName, &dbZip, &dbCity, &dbBic)
+	data, err := repo.Find(countryCode, bankCode)
+	// err := SELECT_BANK_INFORMATION_STMT.QueryRow(bankCode, countryCode).Scan(&dbBankcode, &dbName, &dbZip, &dbCity, &dbBic)
 
-	switch {
-	case err == sql.ErrNoRows:
-		return nil
-	case err != nil:
+	if err != nil {
 		panic("Failed to load bank info from db.")
 	}
 
-	return &BankInfo{dbBankcode, dbName, dbZip, dbCity, dbBic}
+	return data
 }
 
 func prepareSelectBicStatement(db *sql.DB) {

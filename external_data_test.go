@@ -22,24 +22,36 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-package goiban
+package goiban_test
 
 import (
-	"database/sql"
 	"fmt"
+	"os"
 	"testing"
 
+	"github.com/fourcube/goiban"
+	data "github.com/fourcube/goiban-data"
+	"github.com/fourcube/goiban-data-loader/loader"
 	co "github.com/fourcube/goiban/countries"
 	_ "github.com/go-sql-driver/mysql"
 )
 
 var (
-	db, err = sql.Open("mysql", "root:root@/goiban?charset=utf8")
+	repo = data.NewInMemoryStore()
 )
+
+func TestMain(m *testing.M) {
+	loader.LoadBundesbankData(loader.DefaultBundesbankPath(), repo)
+	loader.LoadBelgiumData(loader.DefaultBelgiumPath(), repo)
+
+	retCode := m.Run()
+
+	os.Exit(retCode)
+}
 
 func TestCanReadFromAustriaFile(t *testing.T) {
 	ch := make(chan interface{})
-	go ReadFileToEntries("test/austria.csv", &co.AustriaBankFileEntry{}, ch)
+	go goiban.ReadFileToEntries("test/austria.csv", &co.AustriaBankFileEntry{}, ch)
 
 	peek := (<-ch).(*co.AustriaBankFileEntry)
 	if peek.Name == "" {
@@ -49,7 +61,7 @@ func TestCanReadFromAustriaFile(t *testing.T) {
 
 func TestCannotReadFromNonExistingAustriaFile(t *testing.T) {
 	ch := make(chan interface{})
-	go ReadFileToEntries("test/austria_blablablabla.csv", &co.AustriaBankFileEntry{}, ch)
+	go goiban.ReadFileToEntries("test/austria_blablablabla.csv", &co.AustriaBankFileEntry{}, ch)
 	result := <-ch
 	if result != nil {
 		t.Errorf("Failed to read file.")
@@ -57,7 +69,7 @@ func TestCannotReadFromNonExistingAustriaFile(t *testing.T) {
 }
 func TestCanReadFromBundesbankFile(t *testing.T) {
 	ch := make(chan interface{})
-	go ReadFileToEntries("test/bundesbank.txt", &co.BundesbankFileEntry{}, ch)
+	go goiban.ReadFileToEntries("test/bundesbank.txt", &co.BundesbankFileEntry{}, ch)
 
 	peek := (<-ch).(*co.BundesbankFileEntry)
 	if peek.Name == "" {
@@ -67,7 +79,7 @@ func TestCanReadFromBundesbankFile(t *testing.T) {
 
 func TestCannotReadFromNonExistingBundesbankFile(t *testing.T) {
 	ch := make(chan interface{})
-	go ReadFileToEntries("test/bundesbank_doesntexist.txt", &co.BundesbankFileEntry{}, ch)
+	go goiban.ReadFileToEntries("test/bundesbank_doesntexist.txt", &co.BundesbankFileEntry{}, ch)
 	result := <-ch
 	if result != nil {
 		t.Errorf("Failed to read file.")
@@ -75,23 +87,23 @@ func TestCannotReadFromNonExistingBundesbankFile(t *testing.T) {
 }
 
 func TestCanLoadBankInfoFromDatabase(t *testing.T) {
-	bankInfo := getBankInformationByCountryAndBankCodeFromDb("DE", "84050000", db)
+	bankInfo := goiban.GetBankInformationByCountryAndBankCodeFromDb("DE", "84050000", repo)
 	fmt.Println(bankInfo)
 	if bankInfo == nil {
-		t.Errorf("Cannot load data from db. Is it empty?")
+		t.Errorf("Cannot load data from repo. Is it empty?")
 	}
 }
 
 func TestCanLoadBankInfoFromDatabaseLeadingZeros(t *testing.T) {
-	bankInfo := getBankInformationByCountryAndBankCodeFromDb("BE", "001", db)
+	bankInfo := goiban.GetBankInformationByCountryAndBankCodeFromDb("BE", "001", repo)
 	if bankInfo == nil {
-		t.Errorf("Cannot load data from db. Is it empty?")
+		t.Errorf("Cannot load data from repo. Is it empty?")
 	}
 }
 
 func TestCanReadFromBelgiumXLSX(t *testing.T) {
 	ch := make(chan interface{})
-	go ReadFileToEntries("test/belgium.xlsx", &co.BelgiumFileEntry{}, ch)
+	go goiban.ReadFileToEntries("test/belgium.xlsx", &co.BelgiumFileEntry{}, ch)
 
 	peek := (<-ch).([]co.BelgiumFileEntry)
 	if peek[0].Name != "bpost bank" {
@@ -101,7 +113,7 @@ func TestCanReadFromBelgiumXLSX(t *testing.T) {
 
 func TestCanReadFromNetherlandsXLSX(t *testing.T) {
 	ch := make(chan interface{})
-	go ReadFileToEntries("test/netherlands.xlsx", &co.NetherlandsFileEntry{}, ch)
+	go goiban.ReadFileToEntries("test/netherlands.xlsx", &co.NetherlandsFileEntry{}, ch)
 
 	peek := (<-ch).(co.NetherlandsFileEntry)
 	if peek.Name != "ABN AMRO BANK N.V" {
@@ -110,7 +122,7 @@ func TestCanReadFromNetherlandsXLSX(t *testing.T) {
 }
 func TestCanReadFromSwitzerlandFile(t *testing.T) {
 	ch := make(chan interface{})
-	go ReadFileToEntries("test/switzerland.xlsx", &co.SwitzerlandFileEntry{}, ch)
+	go goiban.ReadFileToEntries("test/switzerland.xlsx", &co.SwitzerlandFileEntry{}, ch)
 
 	peek := (<-ch).(co.SwitzerlandFileEntry)
 	if peek.Bic != "SNBZCHZZXXX" {
@@ -120,7 +132,7 @@ func TestCanReadFromSwitzerlandFile(t *testing.T) {
 
 func TestCanReadFromLiechtensteinXLSX(t *testing.T) {
 	ch := make(chan interface{})
-	go ReadFileToEntries("test/liechtenstein.xlsx", &co.LiechtensteinFileEntry{}, ch)
+	go goiban.ReadFileToEntries("test/liechtenstein.xlsx", &co.LiechtensteinFileEntry{}, ch)
 	peek := (<-ch).(co.LiechtensteinFileEntry)
 	if peek.Bic != "BALPLI22" {
 		t.Errorf("Failed to read file." + peek.Bic)
@@ -128,7 +140,7 @@ func TestCanReadFromLiechtensteinXLSX(t *testing.T) {
 }
 func TestCannotReadFromNonExistingLiechtensteinFile(t *testing.T) {
 	ch := make(chan interface{})
-	go ReadFileToEntries("test/lliechtenstein_blablablabla.xlsx", &co.LiechtensteinFileEntry{}, ch)
+	go goiban.ReadFileToEntries("test/lliechtenstein_blablablabla.xlsx", &co.LiechtensteinFileEntry{}, ch)
 	result := <-ch
 	if result != nil {
 		t.Errorf("Failed to read file.")
@@ -137,10 +149,10 @@ func TestCannotReadFromNonExistingLiechtensteinFile(t *testing.T) {
 
 func TestSpecialRuleForCommerzbankBic(t *testing.T) {
 	input := "DE12120400000052065002"
-	iban := ParseToIban(input)
-	result := NewValidationResult(true, "", input)
+	iban := goiban.ParseToIban(input)
+	result := goiban.NewValidationResult(true, "", input)
 
-	result = GetBic(iban, result, db)
+	result = goiban.GetBic(iban, result, repo)
 
 	if result.BankData.Bic != "COBADEFFXXX" {
 		t.Errorf("Expected Bic COBADEFFXXX, was %v", result.BankData.Bic)
