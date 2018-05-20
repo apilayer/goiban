@@ -49,7 +49,7 @@ type BundesbankFileEntry struct {
 	Pan       int    // 5
 	Bic       string // 11
 	CheckAlgo string // 2 	enumerates some checksum algorithms
-	// 		described in http://www.bundesbank.de/Redaktion/DE/Downloads/Kerngeschaeftsfelder/Unbarer_Zahlungsverkehr/pruefzifferberechnungsmethoden.pdf?__blob=publicationFile
+	// 		described in https://www.bundesbank.de/Redaktion/DE/Downloads/Aufgaben/Unbarer_Zahlungsverkehr/pruefzifferberechnungsmethoden.pdf?__blob=publicationFile
 	Id          string // 5	internal id
 	Change      string // 1
 	ToBeDeleted int    // 1
