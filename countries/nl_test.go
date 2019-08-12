@@ -3,7 +3,7 @@ package countries
 import "testing"
 
 func TestCanConvertSliceToNetherlandsBankEntry(t *testing.T) {
-	data := []string{"FVLB", "FVLBNL22", "F.VAN LANSCHOT BANKIERS N.V.", ""}
+	data := []string{"FVLBNL22", "FVLB", "F.VAN LANSCHOT BANKIERS N.V.", ""}
 	entry := NetherlandsRowToEntry(data)
 
 	if entry.Bankcode != "FVLB" {
