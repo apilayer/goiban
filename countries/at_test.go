@@ -5,16 +5,21 @@ import (
 )
 
 func TestCanConvertStringToAustriaBankEntry(t *testing.T) {
-	data := "Hauptanstalt;\"10050973\";\"52300\";\"KI\";\"Joint stock banks and private banks\";\"350921k\";\"Addiko Bank AG\";\"Wipplingerstraße 34/4\";\"1010\";\"Wien\";\"\";\"\";\"\";\"\";\"\";\"Wien\";\"050232\";\"050232/3000\";\"holding@addiko.com\";\"HSEEAT2KXXX\";\"www.addiko.com\";\"20130621\";;"
-	result := AustriaBankStringToEntry(data)
+	countryCodeToBankCodeMap := map[string]int{
+		"AT": 5,
+	}
+	
+	data := "Hauptanstalt;263575;34322;KI;Raiffeisen;93513w;Raiffeisenbank Mondseeland eGen;Rainerstr. 11;5310;Mondsee;;5310;Mondsee;29;Oberösterreich;06232/3151;06232/315138017;rb@mondseeland.com;RZOOAT2L322;www.mondseeland.com;20.11.1949"
 
-	if result.Bankcode != "52300" {
-		t.Errorf("Couldn't parse bank code.")
+	result := AustriaBankStringToEntry(data, countryCodeToBankCodeMap)
+
+	if result.Bankcode != "34322" {
+		t.Errorf("Couldn't parse bank code. %v", result.Bankcode)
 	}
-	if result.Name != "Addiko Bank AG" {
-		t.Errorf("Couldn't parse name.")
+	if result.Name != "Raiffeisenbank Mondseeland eGen" {
+		t.Errorf("Couldn't parse name. %v", result.Name)
 	}
-	if result.Bic != "HSEEAT2KXXX" {
-		t.Errorf("Couldn't parse bic.", result.Bic)
+	if result.Bic != "RZOOAT2L322" {
+		t.Errorf("Couldn't parse bic. %v", result.Bic)
 	}
 }
