@@ -43,7 +43,7 @@ func AustriaBankStringToEntry(val string, bankCodeLengthMap map[string]int) *Aus
 	records, _ := r.ReadAll()
 	return &AustriaBankFileEntry{
 		records[0][6],
-		records[0][19],
+		records[0][18],
 		PadLeftZero(records[0][2], bankCodeLength),
 	}
 }

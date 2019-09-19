@@ -35,8 +35,8 @@ type NetherlandsFileEntry struct {
 // Bankcodes
 func NetherlandsRowToEntry(row []string) NetherlandsFileEntry {
 	return NetherlandsFileEntry{
-		Bankcode: strings.TrimSpace(row[0]),
+		Bankcode: strings.TrimSpace(row[1]),
 		Name:     strings.TrimSpace(row[2]),
-		Bic:      strings.TrimSpace(row[1]),
+		Bic:      strings.TrimSpace(row[0]),
 	}
 }
